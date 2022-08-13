@@ -1,0 +1,30 @@
+from sklearn.datasets import load_breast_cancer
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import numpy as np
+
+cancer = load_breast_cancer()
+print("Ключи cancer: {}".format(cancer.keys()))
+print("Форма массива data: {}".format(cancer.data.shape))
+print("Кол-во примеров каждого класса: {}".format({n: v for n, v in zip(cancer.target_names, np.bincount(cancer.target))}))
+print("Название признаков: {}".format(cancer.feature_names))
+X_train, X_test, y_train, y_test = train_test_split(cancer.data, cancer.target, stratify=cancer.target, random_state=0)
+neighbor_settings = range(1, 11) #кол-во соседей от 1 до 10
+training_accuracy = [] #сохранение точности при разном кол-ве соседей на обучающем наборе
+test_accuracy = [] #сохранение точности при разном кол-ве соседей на тестовом наборе
+for n_neighbors in neighbor_settings:
+    clf = KNeighborsClassifier(n_neighbors = n_neighbors) #создание модели
+    print('n_neighbors = ', n_neighbors)
+    clf.fit(X_train, y_train) #обучение с учителем
+    training_accuracy.append(clf.score(X_train, y_train)) #запись правильности на обучающем наборе
+    print('Правильность на обучающем наборе: {:.3f}'.format(clf.score(X_train, y_train)))
+    test_accuracy.append(clf.score(X_test, y_test)) #запись правильности на тестовом наборе
+    print('Правильность на тестовом наборе: {:.3f}\n'.format(clf.score(X_test, y_test)))
+#Создание диаграммы
+plt.plot(neighbor_settings, training_accuracy, label='Правильность на обучающем наборе')
+plt.plot(neighbor_settings, test_accuracy, label='Правильность на тестовом наборе')
+plt.ylabel('Правильность')
+plt.xlabel('Кол-во соседей')
+plt.legend()
+plt.show()
